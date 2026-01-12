@@ -35,22 +35,6 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
-    """
-    GET /api/users/profile/ - Ver perfil
-    PUT/PATCH /api/users/profile/ - Actualizar perfil
-    """
-
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserProfileSerializer
-
-    def get_object(self):
-        """
-        Retorna el usuario autenticado.
-        """
-        return self.request.user
-
-
 class ChangePasswordView(generics.UpdateAPIView):
     """
     PUT /api/users/change-password/

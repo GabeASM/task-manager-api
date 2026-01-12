@@ -3,7 +3,6 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from tasks.models import Task
 from tasks.serializers import TaskListSerializer, TaskSerializer
 
 

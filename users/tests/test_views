@@ -1,0 +1,239 @@
+import pytest
+from django.urls import reverse
+from django.contrib.auth.models import User
+from rest_framework import status
+
+
+@pytest.mark.django_db
+class TestUserRegistration:
+    """Tests para registro de usuarios."""
+    
+    def test_register_user_success(self, api_client):
+        """Test registrar un usuario nuevo."""
+        url = reverse('user-register')
+        data = {
+            'username': 'newuser',
+            'email': 'new@example.com',
+            'password': 'SecurePass123!',
+            'password2': 'SecurePass123!',
+            'first_name': 'New',
+            'last_name': 'User'
+        }
+        
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_201_CREATED
+        assert User.objects.filter(username='newuser').exists()
+        assert 'password' not in response.data 
+    
+    def test_register_passwords_mismatch(self, api_client):
+        """Test que las contraseñas deben coincidir."""
+        url = reverse('user-register')
+        data = {
+            'username': 'newuser',
+            'email': 'new@example.com',
+            'password': 'SecurePass123!',
+            'password2': 'DifferentPass123!',
+            'first_name': 'New',
+            'last_name': 'User'
+        }
+        
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'password' in response.data
+    
+    def test_register_duplicate_email(self, api_client, user):
+        """Test que no se puede registrar con email duplicado."""
+        url = reverse('user-register')
+        data = {
+            'username': 'newuser',
+            'email': user.email,  
+            'password': 'SecurePass123!',
+            'password2': 'SecurePass123!',
+            'first_name': 'New',
+            'last_name': 'User'
+        }
+        
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'email' in response.data
+    
+    def test_register_weak_password(self, api_client):
+        """Test que se valida la fortaleza de la contraseña."""
+        url = reverse('user-register')
+        data = {
+            'username': 'newuser',
+            'email': 'new@example.com',
+            'password': '123', 
+            'password2': '123',
+            'first_name': 'New',
+            'last_name': 'User'
+        }
+        
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'password' in response.data
+
+
+@pytest.mark.django_db
+class TestUserProfile:
+    """Tests para perfil de usuario."""
+    
+    def test_get_profile_authenticated(self, authenticated_client, user):
+        """Test obtener perfil del usuario autenticado."""
+        url = reverse('user-profile')
+        response = authenticated_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['username'] == user.username
+        assert response.data['email'] == user.email
+        assert 'tasks_count' in response.data
+    
+    def test_get_profile_unauthenticated(self, api_client):
+        """Test que usuarios no autenticados no pueden ver perfil."""
+        url = reverse('user-profile')
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    
+    def test_update_profile(self, authenticated_client, user):
+        """Test actualizar perfil del usuario."""
+        url = reverse('user-profile')
+        data = {
+            'first_name': 'Nuevo',
+            'last_name': 'Nombre',
+            'email': 'nuevo@example.com'
+        }
+        
+        response = authenticated_client.patch(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['first_name'] == 'Nuevo'
+        
+        user.refresh_from_db()
+        assert user.first_name == 'Nuevo'
+        assert user.email == 'nuevo@example.com'
+
+
+@pytest.mark.django_db
+class TestChangePassword:
+    """Tests para cambio de contraseña."""
+    
+    def test_change_password_success(self, authenticated_client, user):
+        """Test cambiar contraseña correctamente."""
+        url = reverse('change-password')
+        data = {
+            'old_password': 'testpass123',
+            'new_password': 'NewSecurePass123!',
+            'new_password2': 'NewSecurePass123!'
+        }
+        
+        response = authenticated_client.put(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_200_OK
+        
+        user.refresh_from_db()
+        assert user.check_password('NewSecurePass123!')
+    
+    def test_change_password_wrong_old_password(self, authenticated_client):
+        """Test que falla si la contraseña actual es incorrecta."""
+        url = reverse('change-password')
+        data = {
+            'old_password': 'wrongpassword',
+            'new_password': 'NewSecurePass123!',
+            'new_password2': 'NewSecurePass123!'
+        }
+        
+        response = authenticated_client.put(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'old_password' in response.data
+    
+    def test_change_password_mismatch(self, authenticated_client):
+        """Test que falla si las contraseñas nuevas no coinciden."""
+        url = reverse('change-password')
+        data = {
+            'old_password': 'testpass123',
+            'new_password': 'NewSecurePass123!',
+            'new_password2': 'DifferentPass123!'
+        }
+        
+        response = authenticated_client.put(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'new_password' in response.data
+
+
+@pytest.mark.django_db
+class TestCurrentUser:
+    """Tests para endpoint /api/users/me/"""
+    
+    def test_current_user_authenticated(self, authenticated_client, user):
+        """Test obtener información del usuario actual."""
+        url = reverse('current-user')
+        response = authenticated_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['username'] == user.username
+        assert response.data['email'] == user.email
+    
+    def test_current_user_unauthenticated(self, api_client):
+        """Test que usuarios no autenticados no pueden acceder."""
+        url = reverse('current-user')
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+class TestJWTAuthentication:
+    """Tests para autenticación JWT."""
+    
+    def test_obtain_token(self, api_client, user):
+        """Test obtener token JWT."""
+        url = reverse('token_obtain_pair')
+        data = {
+            'username': 'testuser',
+            'password': 'testpass123'
+        }
+        
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert 'access' in response.data
+        assert 'refresh' in response.data
+    
+    def test_obtain_token_invalid_credentials(self, api_client):
+        """Test que falla con credenciales incorrectas."""
+        url = reverse('token_obtain_pair')
+        data = {
+            'username': 'wronguser',
+            'password': 'wrongpass'
+        }
+        
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    
+    def test_refresh_token(self, api_client, user):
+        """Test refrescar token JWT."""
+        # Primero obtener tokens
+        token_url = reverse('token_obtain_pair')
+        token_response = api_client.post(token_url, {
+            'username': 'testuser',
+            'password': 'testpass123'
+        }, format='json')
+        
+        refresh_token = token_response.data['refresh']
+        
+        # Refrescar el token
+        refresh_url = reverse('token_refresh')
+        response = api_client.post(refresh_url, {
+            'refresh': refresh_token
+        }, format='json')
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert 'access' in response.data

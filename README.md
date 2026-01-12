@@ -285,8 +285,8 @@ Este proyecto es de código abierto bajo la licencia MIT.
 ## 👤 Autor
 
 **Tu Nombre**
-- GitHub: [@tu_usuario](https://github.com/tu_usuario)
-- LinkedIn: [Tu LinkedIn](https://linkedin.com/in/tu-perfil)
+- GitHub: [gabriel-asm-hash](https://github.com/gabriel-asm-hash)
+- LinkedIn: [Gabriel Aillapán](https://linkedin.com/in/gaillapan)
 
 ## 🤝 Contribuciones
 

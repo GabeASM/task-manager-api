@@ -1,5 +1,6 @@
-import pytest
 from django.urls import reverse
+
+import pytest
 from rest_framework import status
 
 from tasks.models import Task
@@ -128,9 +129,7 @@ class TestTaskViewSet:
 
     def test_search_tasks(self, authenticated_client, user):
         """Test buscar tareas por título o descripción."""
-        Task.objects.create(
-            title="Comprar pan", description="En la panadería", user=user
-        )
+        Task.objects.create(title="Comprar pan", description="En la panadería", user=user)
         Task.objects.create(title="Llamar doctor", description="Urgente", user=user)
 
         url = reverse("task-list")
@@ -182,9 +181,7 @@ class TestTaskCustomActions:
     def test_stats_endpoint(self, authenticated_client, user):
         """Test endpoint /api/tasks/stats/"""
         Task.objects.create(title="T1", status="pending", priority="high", user=user)
-        Task.objects.create(
-            title="T2", status="completed", priority="medium", user=user
-        )
+        Task.objects.create(title="T2", status="completed", priority="medium", user=user)
         Task.objects.create(title="T3", status="in_progress", priority="low", user=user)
 
         url = "/api/tasks/stats/"

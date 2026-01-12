@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
+
 from rest_framework import serializers
 
 
@@ -14,9 +15,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validators=[validate_password],
         style={"input_type": "password"},
     )
-    password2 = serializers.CharField(
-        write_only=True, required=True, style={"input_type": "password"}
-    )
+    password2 = serializers.CharField(write_only=True, required=True, style={"input_type": "password"})
 
     class Meta:
         model = User
@@ -39,9 +38,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         Valida que las contraseñas coincidan.
         """
         if attrs["password"] != attrs["password2"]:
-            raise serializers.ValidationError(
-                {"password": "Las contraseñas no coinciden."}
-            )
+            raise serializers.ValidationError({"password": "Las contraseñas no coinciden."})
         return attrs
 
     def validate_email(self, value):
@@ -102,9 +99,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     """
 
     old_password = serializers.CharField(required=True, write_only=True)
-    new_password = serializers.CharField(
-        required=True, write_only=True, validators=[validate_password]
-    )
+    new_password = serializers.CharField(required=True, write_only=True, validators=[validate_password])
     new_password2 = serializers.CharField(required=True, write_only=True)
 
     def validate(self, attrs):
@@ -112,9 +107,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         Valida que las contraseñas nuevas coincidan.
         """
         if attrs["new_password"] != attrs["new_password2"]:
-            raise serializers.ValidationError(
-                {"new_password": "Las contraseñas no coinciden."}
-            )
+            raise serializers.ValidationError({"new_password": "Las contraseñas no coinciden."})
         return attrs
 
     def validate_old_password(self, value):

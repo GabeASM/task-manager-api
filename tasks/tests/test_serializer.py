@@ -1,7 +1,8 @@
 from datetime import timedelta
 
-import pytest
 from django.utils import timezone
+
+import pytest
 
 from tasks.serializers import TaskListSerializer, TaskSerializer
 
@@ -54,9 +55,7 @@ class TestTaskSerializer:
         is_valid = serializer.is_valid(raise_exception=False)
 
         assert not is_valid, f"Expected invalid but got: {serializer.validated_data}"
-        assert (
-            "due_date" in serializer.errors
-        ), f"Expected due_date error but got: {serializer.errors}"
+        assert "due_date" in serializer.errors, f"Expected due_date error but got: {serializer.errors}"
 
     def test_required_fields(self):
         """Test que title es requerido."""

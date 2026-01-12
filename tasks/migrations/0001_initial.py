@@ -59,21 +59,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "due_date",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha limite"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha limite"),
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de creación"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación"),
                 ),
                 (
                     "update_at",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="Ultima actualización"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="Ultima actualización"),
                 ),
                 (
                     "user",

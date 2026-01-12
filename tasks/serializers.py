@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.utils import timezone
+
 from rest_framework import serializers
 
 from .models import Task
@@ -58,9 +59,7 @@ class TaskSerializer(serializers.ModelSerializer):
         Valida que la fecha límite no sea en el pasado.
         """
         if value and value < timezone.now():
-            raise serializers.ValidationError(
-                "La fecha límite no puede ser en el pasado."
-            )
+            raise serializers.ValidationError("La fecha límite no puede ser en el pasado.")
         return value
 
 
@@ -71,9 +70,7 @@ class TaskListSerializer(serializers.ModelSerializer):
 
     user_username = serializers.CharField(source="user.username", read_only=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
-    priority_display = serializers.CharField(
-        source="get_priority_display", read_only=True
-    )
+    priority_display = serializers.CharField(source="get_priority_display", read_only=True)
 
     class Meta:
         model = Task

@@ -22,9 +22,7 @@ class Task(models.Model):
 
     title = models.CharField(max_length=200, verbose_name="Titulo")
     description = models.TextField(blank=True, verbose_name="Descripción")
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="pending", verbose_name="Estado"
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending", verbose_name="Estado")
 
     priority = models.CharField(
         max_length=20,
@@ -34,15 +32,9 @@ class Task(models.Model):
     )
 
     due_date = models.DateTimeField(null=True, blank=True, verbose_name="Fecha limite")
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Fecha de creación"
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True, verbose_name="Ultima actualización"
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="tasks", verbose_name="Usuario"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Ultima actualización")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks", verbose_name="Usuario")
 
     class Meta:
         ordering = ["-created_at"]
